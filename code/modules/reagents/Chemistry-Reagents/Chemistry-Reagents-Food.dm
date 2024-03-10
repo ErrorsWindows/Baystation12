@@ -48,10 +48,10 @@
 	M.add_chemical_effect(CE_BLOODRESTORE, 4 * removed)
 
 /datum/reagent/nutriment/proc/adjust_nutrition(mob/living/carbon/M, removed)
-	var/nut_removed = removed
-	var/hyd_removed = removed
 	if (HAS_TRAIT(M, /singleton/trait/boon/cast_iron_stomach))
 		removed *= 0.1 // Unathi get most of their nutrition from meat.
+	var/nut_removed = removed
+	var/hyd_removed = removed
 	if(nutriment_factor)
 		M.adjust_nutrition(nutriment_factor * nut_removed) // For hunger and fatness
 	if(hydration_factor)
@@ -108,7 +108,7 @@
 
 /datum/reagent/nutriment/flour/touch_turf(turf/simulated/T)
 	if(istype(T))
-		new /obj/effect/decal/cleanable/flour(T)
+		new /obj/decal/cleanable/flour(T)
 		if(T.wet > 1)
 			T.wet = min(T.wet, 1)
 		else
@@ -125,7 +125,7 @@
 
 /datum/reagent/nutriment/batter/touch_turf(turf/simulated/T)
 	if(!istype(T, /turf/space))
-		new /obj/effect/decal/cleanable/pie_smudge(T)
+		new /obj/decal/cleanable/pie_smudge(T)
 		if(T.wet > 1)
 			T.wet = min(T.wet, 1)
 		else
@@ -447,7 +447,7 @@
 			to_chat(M, SPAN_WARNING("Your [eye_protection] protects your eyes from the pepperspray!"))
 	else
 		to_chat(M, SPAN_WARNING("The pepperspray gets in your eyes!"))
-		M.confused += 2
+		M.mod_confused(2)
 		if(mouth_covered)
 			M.eye_blurry = max(M.eye_blurry, effective_strength * 3)
 			M.eye_blind = max(M.eye_blind, effective_strength)

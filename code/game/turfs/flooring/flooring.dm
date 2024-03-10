@@ -66,6 +66,9 @@
 	wall_smooth = SMOOTH_ALL
 	space_smooth = SMOOTH_NONE
 
+/singleton/flooring/grass/cut
+	floor_smooth = SMOOTH_ALL
+
 /singleton/flooring/dirt
 	name = "dirt"
 	desc = "Extra dirty."
@@ -137,6 +140,11 @@
 	name = "red carpet"
 	icon_base = "red"
 	build_type = /obj/item/stack/tile/carpetred
+
+/singleton/flooring/carpet/black
+	name = "black carpet"
+	icon_base = "black"
+	build_type = /obj/item/stack/tile/carpetblack
 
 /singleton/flooring/linoleum
 	name = "linoleum"

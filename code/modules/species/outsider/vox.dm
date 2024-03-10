@@ -7,6 +7,7 @@
 	damage_overlays = 'icons/mob/human_races/species/vox/damage_overlay.dmi'
 	damage_mask =     'icons/mob/human_races/species/vox/damage_mask.dmi'
 	blood_mask =      'icons/mob/human_races/species/vox/blood_mask.dmi'
+	preview_icon = 'icons/mob/human_races/species/vox/preview.dmi'
 
 	unarmed_types = list(
 		/datum/unarmed_attack/stomp,
@@ -78,6 +79,7 @@
 		)
 
 	genders = list(NEUTER)
+	pronouns = list(PRONOUNS_THEY_THEM, PRONOUNS_IT_ITS)
 	descriptors = list(
 		/datum/mob_descriptor/height = -1,
 		/datum/mob_descriptor/build = 1,
@@ -139,9 +141,6 @@
 /datum/species/vox/disfigure_msg(mob/living/carbon/human/H)
 	var/datum/pronouns/P = H.choose_from_pronouns()
 	return "[SPAN_DANGER("[P.His] beak-segments are cracked and chipped! [P.He] [P.is] not even recognizable.")]\n"
-
-/datum/species/vox/skills_from_age(age)
-	. = 8
 
 /obj/item/vox_changer
 	name = "mouldy mirror"

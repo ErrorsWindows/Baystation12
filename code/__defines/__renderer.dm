@@ -40,6 +40,8 @@
 
 #define HEAT_EFFECT_PLANE -4
 #define HEAT_EFFECT_TARGET    "*heat"
+#define COLD_EFFECT_TARGET    "*cold"
+#define COLD_EFFECT_BACK_TARGET "*coldb"
 #define HEAT_COMPOSITE_TARGET "*heatc"
 #define WARP_EFFECT_PLANE -3
 
@@ -194,6 +196,8 @@
 /atom/plane = DEFAULT_PLANE
 
 #define DEFAULT_APPEARANCE_FLAGS (PIXEL_SCALE)
+
+#define DEFAULT_RENDERER_APPEARANCE_FLAGS (PLANE_MASTER | NO_CLIENT_COLOR)
 
 /atom/appearance_flags = DEFAULT_APPEARANCE_FLAGS
 /atom/movable/appearance_flags = DEFAULT_APPEARANCE_FLAGS | TILE_BOUND // Most AMs are not visibly bigger than a tile.

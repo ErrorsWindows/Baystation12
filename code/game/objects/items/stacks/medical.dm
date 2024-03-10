@@ -6,7 +6,6 @@
 	amount = 5
 	max_amount = 5
 	w_class = ITEM_SIZE_SMALL
-	item_flags = ITEM_FLAG_TRY_ATTACK
 	throw_speed = 4
 	throw_range = 20
 
@@ -25,9 +24,7 @@
 	else
 		. = TRUE
 
-///Clickon() with medical stacks will never go past attack() because this proc will never return FALSE. If needed, this is where to change it. Returns TRUE if handled and cannot progress.
-/obj/item/stack/medical/attack(mob/living/carbon/M, mob/user)
-	. = FALSE
+/obj/item/stack/medical/use_after(mob/living/carbon/M, mob/user)
 	if (!istype(M))
 		return FALSE
 
@@ -78,8 +75,7 @@
 	apply_sounds = list('sound/effects/rip1.ogg','sound/effects/rip2.ogg')
 	amount = 10
 
-/obj/item/stack/medical/bruise_pack/attack(mob/living/carbon/M, mob/user)
-	. = FALSE
+/obj/item/stack/medical/bruise_pack/use_after(mob/living/carbon/M, mob/user)
 	if (..())
 		return TRUE
 
@@ -138,8 +134,7 @@
 	animal_heal = 4
 	apply_sounds = list('sound/effects/ointment.ogg')
 
-/obj/item/stack/medical/ointment/attack(mob/living/carbon/M, mob/user)
-	. = FALSE
+/obj/item/stack/medical/ointment/use_after(mob/living/carbon/M, mob/user)
 	if (..())
 		return TRUE
 
@@ -174,16 +169,13 @@
 	apply_sounds = list('sound/effects/rip1.ogg','sound/effects/rip2.ogg','sound/effects/tape.ogg')
 	amount = 10
 
-/obj/item/stack/medical/advanced/bruise_pack/attack(mob/living/carbon/M, mob/user)
-	. = FALSE
+/obj/item/stack/medical/advanced/bruise_pack/use_after(mob/living/carbon/M, mob/user)
 	if (..())
 		return TRUE
 
-	var/list/all_surgeries = GET_SINGLETON_SUBTYPE_MAP(/singleton/surgery_step)
-	for (var/singleton in all_surgeries)
-		var/singleton/surgery_step/S = all_surgeries[singleton]
-		if (S.name && S.tool_quality(src) && S.can_use(user, M, user.zone_sel.selecting, src))
-			return FALSE
+	var/turf/T = get_turf(M)
+	if (locate(/obj/machinery/optable, T) && user.a_intent == I_HELP)
+		return FALSE
 
 	if (istype(M, /mob/living/carbon/human))
 		var/mob/living/carbon/human/H = M
@@ -239,8 +231,7 @@
 	apply_sounds = list('sound/effects/ointment.ogg')
 
 
-/obj/item/stack/medical/advanced/ointment/attack(mob/living/carbon/M, mob/user)
-	. = FALSE
+/obj/item/stack/medical/advanced/ointment/use_after(mob/living/carbon/M, mob/user)
 	if (..())
 		return TRUE
 
@@ -278,8 +269,7 @@
 	can_treat_robots = TRUE
 	var/list/splintable_organs = list(BP_L_ARM, BP_R_ARM, BP_L_LEG, BP_R_LEG, BP_L_HAND, BP_R_HAND, BP_L_FOOT, BP_R_FOOT)	//List of organs you can splint, natch.
 
-/obj/item/stack/medical/splint/attack(mob/living/carbon/M, mob/user)
-	. = FALSE
+/obj/item/stack/medical/splint/use_after(mob/living/carbon/M, mob/user)
 	if (..())
 		return TRUE
 
@@ -360,8 +350,7 @@
 	return TRUE
 
 
-/obj/item/stack/medical/resin/attack(mob/living/carbon/M, mob/user)
-	. = FALSE
+/obj/item/stack/medical/resin/use_after(mob/living/carbon/M, mob/user)
 	if (..())
 		return TRUE
 

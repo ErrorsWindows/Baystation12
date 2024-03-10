@@ -38,9 +38,11 @@
 	if(cell)
 		cell.emp_act(severity)
 
-/obj/item/inducer/afterattack(obj/O, mob/living/carbon/user, proximity)
-	if (!proximity || user.a_intent == I_HURT || CannotUse(user) || !recharge(O, user))
-		return ..()
+/obj/item/inducer/use_after(obj/O, mob/living/user, click_parameters)
+	if (!istype(O))
+		return FALSE
+	if (CannotUse(user) || !recharge(O, user))
+		return TRUE
 
 /obj/item/inducer/proc/CannotUse(mob/user)
 	var/obj/item/cell/my_cell = get_cell()
@@ -91,7 +93,7 @@
 		O = A
 	if(C)
 		var/length = 10
-		var/datum/effect/effect/system/spark_spread/sparks = new /datum/effect/effect/system/spark_spread()
+		var/datum/effect/spark_spread/sparks = new /datum/effect/spark_spread()
 		sparks.set_up(1, 1, user.loc)
 		sparks.start()
 		if(C.charge >= C.maxcharge)

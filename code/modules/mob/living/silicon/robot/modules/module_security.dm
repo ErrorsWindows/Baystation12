@@ -20,7 +20,6 @@
 		SKILL_BUREAUCRACY = SKILL_TRAINED
 	)
 
-
 /obj/item/robot_module/security/general
 	name = "security robot module"
 	display_name = "Security"
@@ -47,8 +46,6 @@
 	)
 	emag_gear = list(
 		/obj/item/melee/baton/robot/electrified_arm,
-		/obj/item/gun/energy/gun,
-		/obj/item/gun/projectile/automatic/sec_smg,
 		/obj/item/gun/energy/plasmacutter,
 		/obj/item/borg/combat/shield
 	)
@@ -74,7 +71,8 @@
 		/obj/item/melee/baton/robot/electrified_arm,
 		/obj/item/gun/projectile/automatic/l6_saw
 	)
-
+	use_map_synth_access = FALSE
+	use_all_station_access = TRUE
 
 /obj/item/robot_module/security/combat/Initialize()
 	. = ..()

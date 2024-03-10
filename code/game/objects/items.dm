@@ -114,6 +114,8 @@
 			if(armor[type]) // Don't set it if it gives no armor anyway, which is many items.
 				set_extension(src, armor_type, armor, armor_degradation_speed)
 				break
+	if (item_flags & ITEM_FLAG_IS_CHAMELEON_ITEM)
+		SetupChameleonExtension(CHAMELEON_FLEXIBLE_OPTIONS_EXTENSION, FALSE, TRUE)
 
 /obj/item/Destroy()
 	QDEL_NULL(hidden_uplink)
@@ -225,14 +227,15 @@
 		var/obj/item/organ/external/temp = H.organs_by_name[BP_R_HAND]
 		if (user.hand)
 			temp = H.organs_by_name[BP_L_HAND]
-		if(MUTATION_FERAL in user.mutations)
-			return
+		if((MUTATION_FERAL in user.mutations) && (MUTATION_CLUMSY in user.mutations))
+			to_chat(user, SPAN_WARNING("You don't have the dexterity to pick up \the [src]!"))
+			return TRUE
 		if(temp && !temp.is_usable())
 			to_chat(user, SPAN_NOTICE("You try to move your [temp.name], but cannot!"))
-			return
+			return TRUE
 		if(!temp)
 			to_chat(user, SPAN_NOTICE("You try to use your hand, but realize it is no longer attached!"))
-			return
+			return TRUE
 
 	var/old_loc = loc
 
@@ -256,7 +259,7 @@
 
 	if(user.put_in_active_hand(src))
 		if (isturf(old_loc))
-			var/obj/effect/temporary/item_pickup_ghost/ghost = new(old_loc, src)
+			var/obj/temporary/item_pickup_ghost/ghost = new(old_loc, src)
 			ghost.animate_towards(user)
 		if(randpixel)
 			pixel_x = rand(-randpixel, randpixel)
@@ -275,25 +278,37 @@
 		R.activate_module(src)
 		R.hud_used.update_robot_modules_display()
 
-/obj/item/attackby(obj/item/W, mob/user)
-	if((. = SSfabrication.try_craft_with(src, W, user)))
-		return
 
-	if(istype(W, /obj/item/storage))
-		var/obj/item/storage/S = W
-		if(S.use_to_pickup)
-			if(S.collection_mode) //Mode is set to collect all items
-				if(isturf(src.loc))
-					S.gather_all(src.loc, user)
-			else if (S.can_be_inserted(src, user))
-				S.handle_item_insertion(src)
-
-/obj/item/use_on(obj/target, mob/user)
-	if (istype(target, /obj/item/clothing))
-		var/obj/item/clothing/clothes = target
-		if (clothes.attempt_store_item(src, user))
-			return TRUE
+/obj/item/use_tool(obj/item/item, mob/living/user, list/click_params)
+	if (SSfabrication.try_craft_with(src, item, user))
+		return TRUE
+	if (istype(item, /obj/item/storage) && isturf(loc))
+		var/obj/item/storage/storage = item
+		if (!storage.allow_quick_gather)
+			return ..()
+		if (!storage.quick_gather_single)
+			storage.gather_all(loc, user)
+		else if (storage.can_be_inserted(src, user))
+			storage.handle_item_insertion(src)
+		return TRUE
 	return ..()
+
+
+///Eventually should be deleted in favor of use_tool; keeping duplicate until downstream attackbys are replaced.
+/obj/item/attackby(obj/item/item, mob/living/user, list/click_params)
+	if (SSfabrication.try_craft_with(src, item, user))
+		return TRUE
+	if (istype(item, /obj/item/storage) && isturf(loc))
+		var/obj/item/storage/storage = item
+		if (!storage.allow_quick_gather)
+			return ..()
+		if (!storage.quick_gather_single)
+			storage.gather_all(loc, user)
+		else if (storage.can_be_inserted(src, user))
+			storage.handle_item_insertion(src)
+		return TRUE
+	return ..()
+
 
 /obj/item/can_embed()
 	if (!canremove)
@@ -548,7 +563,7 @@ var/global/list/slot_flags_enumeration = list(
 //For non-projectile attacks this usually means the attack is blocked.
 //Otherwise should return 0 to indicate that the attack is not affected in any way.
 /obj/item/proc/handle_shield(mob/user, damage, atom/damage_source = null, mob/attacker = null, def_zone = null, attack_text = "the attack")
-	var/parry_chance = get_parry_chance(user)
+	var/parry_chance = get_parry_chance(user, attacker)
 	if(parry_chance)
 		if(default_parry_check(user, attacker, damage_source) && prob(parry_chance))
 			user.visible_message(SPAN_DANGER("\The [user] parries [attack_text] with \the [src]!"))
@@ -561,12 +576,15 @@ var/global/list/slot_flags_enumeration = list(
 /obj/item/proc/on_parry(damage_source)
 	return
 
-/obj/item/proc/get_parry_chance(mob/user)
+/obj/item/proc/get_parry_chance(mob/user, mob/attacker)
 	. = base_parry_chance
+	if (!istype(user) || !istype(attacker))
+		return
 	if (user.a_intent == I_HELP)
 		. = 0
 	if (.)
-		. += clamp((user.get_skill_value(SKILL_COMBAT) * 10) - 20, 0, 75)
+		. += (user.get_skill_difference(SKILL_COMBAT, attacker) * 5)
+		. = clamp(., 0, 75)
 
 /obj/item/proc/on_disarm_attempt(mob/target, mob/living/attacker)
 	if(force < 1)
@@ -885,6 +903,8 @@ modules/mob/living/carbon/human/life.dm if you die, you will be zoomed out.
 	var/ID = GetIdCard()
 	if(ID)
 		. += "  <a href='?src=\ref[ID];look_at_id=1'>\[Look at ID\]</a>"
+	else
+		. += "  <a href='?src=\ref[src];examine=1'>\[?\]</a>"
 
 /obj/item/proc/on_active_hand(mob/M)
 
@@ -951,3 +971,10 @@ modules/mob/living/carbon/human/life.dm if you die, you will be zoomed out.
 /// Virtual for behavior to do after successful do_after if equip_delay is set
 /obj/item/proc/equip_delay_after(mob/user, slot, equip_flags)
 	return
+
+/obj/item/OnTopic(href, href_list, datum/topic_state/state)
+	. = ..()
+
+	if (href_list["examine"])
+		examinate(usr, src)
+		return TOPIC_HANDLED

@@ -16,7 +16,7 @@
 	throw_range = 5
 	w_class = ITEM_SIZE_NORMAL
 	origin_tech = list(TECH_ENGINEERING = 4, TECH_MATERIAL = 2)
-	var/datum/effect/effect/system/spark_spread/spark_system
+	var/datum/effect/spark_spread/spark_system
 	var/stored_matter = 0
 	var/max_stored_matter = 120
 
@@ -48,7 +48,7 @@
 
 /obj/item/rcd/New()
 	..()
-	src.spark_system = new /datum/effect/effect/system/spark_spread
+	src.spark_system = new /datum/effect/spark_spread
 	spark_system.set_up(5, 0, src)
 	spark_system.attach(src)
 	update_icon()	//Initializes the ammo counter
@@ -110,8 +110,10 @@
 			work_mode = GET_SINGLETON(/singleton/hierarchy/rcd_mode/floor_and_walls)
 		if ("Wall Frames")
 			work_mode = GET_SINGLETON(/singleton/hierarchy/rcd_mode/wall_frame)
-		if ("Machine & Computer Frame")
+		if ("Machine Frame")
 			work_mode = GET_SINGLETON(/singleton/hierarchy/rcd_mode/machine_frame)
+		if ("Computer Frame")
+			work_mode = GET_SINGLETON(/singleton/hierarchy/rcd_mode/computer_frame)
 		if ("Deconstruction")
 			work_mode = GET_SINGLETON(/singleton/hierarchy/rcd_mode/deconstruction)
 
@@ -121,14 +123,14 @@
 	playsound(src.loc, 'sound/effects/pop.ogg', 50, 0)
 	if(prob(20)) src.spark_system.start()
 
-/obj/item/rcd/afterattack(atom/A, mob/user, proximity)
-	if(!proximity) return
+/obj/item/rcd/use_after(atom/A, mob/living/user, click_parameters)
 	if(disabled && !isrobot(user))
-		return 0
+		return FALSE
 	if(istype(get_area(A),/area/shuttle)||istype(get_area(A),/turf/space/transit))
-		return 0
+		return FALSE
 	work_id++
 	work_mode.do_work(src, A, user)
+	return TRUE
 
 /obj/item/rcd/proc/useResource(amount, mob/user)
 	if(stored_matter < amount)

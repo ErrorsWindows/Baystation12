@@ -190,7 +190,7 @@
 	display_name = "blood tomato plant"
 	mutants = list("killer")
 	chems = list(/datum/reagent/nutriment = list(1,10), /datum/reagent/blood = list(1,5))
-	splat_type = /obj/effect/decal/cleanable/blood/splatter
+	splat_type = /obj/decal/cleanable/blood/splatter
 
 /datum/seed/tomato/blood/New()
 	..()
@@ -345,7 +345,7 @@
 	display_name = "chanterelle cluster"
 	mutants = list("reishi","amanita","plumphelmet")
 	chems = list(/datum/reagent/nutriment = list(1,25))
-	splat_type = /obj/effect/vine
+	splat_type = /obj/vine
 	kitchen_tag = "mushroom"
 
 /datum/seed/mushroom/New()
@@ -1279,7 +1279,7 @@
 	set_trait(TRAIT_PRODUCTION,5)
 	set_trait(TRAIT_YIELD,4)
 	set_trait(TRAIT_POTENCY,10)
-	set_trait(TRAIT_PRODUCT_ICON,"grass2")
+	set_trait(TRAIT_PRODUCT_ICON,"algae")
 	set_trait(TRAIT_PRODUCT_COLOUR,"#84bd82")
 	set_trait(TRAIT_PLANT_COLOUR,"#6d9c6b")
 	set_trait(TRAIT_PLANT_ICON,"algae")
@@ -1548,7 +1548,7 @@
 	set_trait(TRAIT_PRODUCTION,5)
 	set_trait(TRAIT_YIELD,4)
 	set_trait(TRAIT_POTENCY,10)
-	set_trait(TRAIT_PRODUCT_ICON,"vine2")
+	set_trait(TRAIT_PRODUCT_ICON,"algae")
 	set_trait(TRAIT_PRODUCT_COLOUR,"#e93e1c")
 	set_trait(TRAIT_PLANT_COLOUR,"#6d9c6b")
 	set_trait(TRAIT_PLANT_ICON,"algae")
@@ -1582,7 +1582,7 @@
 	seed_noun = SEED_NOUN_SPORES
 	display_name = "o'krri cluster"
 	chems = list(/datum/reagent/nutriment = list(1,25), /datum/reagent/drugs/psilocybin = list(1,3))
-	splat_type = /obj/effect/vine
+	splat_type = /obj/vine
 	kitchen_tag = "mushroom"
 
 /datum/seed/okrri/New()
@@ -1601,7 +1601,7 @@
 
 /datum/seed/ximikoa
 	name = "ximikoa"
-	seed_name = "ximi'koa stalks"
+	seed_name = "ximi'koa"
 	display_name = "ximi'koa patch"
 	chems = list(/datum/reagent/nutriment = list(1,2), /datum/reagent/sugar = list(4,5))
 	fruit_size = ITEM_SIZE_TINY

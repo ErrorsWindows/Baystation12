@@ -34,7 +34,6 @@
 	emag_gear = list(
 		/obj/item/melee/baton/robot/electrified_arm,
 		/obj/item/device/flash,
-		/obj/item/gun/energy/gun,
 		/obj/prefab/hand_teleporter,
 		/obj/item/gun/energy/decloner
 	)
@@ -50,6 +49,7 @@
 		SKILL_BOTANY              = SKILL_EXPERIENCED,
 		SKILL_ELECTRICAL          = SKILL_EXPERIENCED
 	)
+
 /obj/item/robot_module/research/finalize_equipment()
 	. = ..()
 	var/obj/item/stack/nanopaste/N = locate() in equipment

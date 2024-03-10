@@ -3,7 +3,6 @@
 	desc = "You're not sure what this is. You should probably ahelp it."
 	body_parts_covered = 0
 	waterproof = FALSE
-	item_flags = ITEM_FLAG_TRY_ATTACK
 
 	var/lit = 0
 	var/icon_on
@@ -115,13 +114,13 @@
 		lit = 1
 		damtype = DAMAGE_BURN
 		if(reagents.get_reagent_amount(/datum/reagent/toxin/phoron)) // the phoron explodes when exposed to fire
-			var/datum/effect/effect/system/reagents_explosion/e = new()
+			var/datum/effect/reagents_explosion/e = new()
 			e.set_up(round(reagents.get_reagent_amount(/datum/reagent/toxin/phoron) / 2.5, 1), get_turf(src), 0, 0)
 			e.start()
 			qdel(src)
 			return
 		if(reagents.get_reagent_amount(/datum/reagent/fuel)) // the fuel explodes, too, but much less violently
-			var/datum/effect/effect/system/reagents_explosion/e = new()
+			var/datum/effect/reagents_explosion/e = new()
 			e.set_up(round(reagents.get_reagent_amount(/datum/reagent/fuel) / 5, 1), get_turf(src), 0, 0)
 			e.start()
 			qdel(src)
@@ -162,7 +161,7 @@
 		text = replacetext(text, "FLAME", "[W.name]")
 		light(text)
 
-/obj/item/clothing/mask/smokable/attack(mob/living/M, mob/living/user)
+/obj/item/clothing/mask/smokable/use_before(mob/living/M, mob/living/user)
 	. = FALSE
 	if (istype(M) && M.on_fire)
 		user.do_attack_animation(M)
@@ -332,7 +331,7 @@
 
 	return
 
-/obj/item/clothing/mask/smokable/cigarette/attack(mob/living/carbon/human/H, mob/user)
+/obj/item/clothing/mask/smokable/cigarette/use_before(mob/living/carbon/human/H, mob/user)
 	if (lit && H == user && istype(H))
 		var/obj/item/blocked = H.check_mouth_coverage()
 		if (blocked)
@@ -344,22 +343,22 @@
 		return TRUE
 	return ..()
 
-/obj/item/clothing/mask/smokable/cigarette/afterattack(obj/item/reagent_containers/glass/glass, mob/user, proximity)
-	..()
-	if(!proximity)
-		return
-	if(istype(glass)) //you can dip cigarettes into beakers
-		if(!glass.is_open_container())
-			to_chat(user, SPAN_NOTICE("You need to take the lid off first."))
-			return
-		var/transfered = glass.reagents.trans_to_obj(src, chem_volume)
-		if(transfered)	//if reagents were transfered, show the message
-			to_chat(user, SPAN_NOTICE("You dip \the [src] into \the [glass]."))
-		else			//if not, either the beaker was empty, or the cigarette was full
-			if(!glass.reagents.total_volume)
-				to_chat(user, SPAN_NOTICE("[glass] is empty."))
-			else
-				to_chat(user, SPAN_NOTICE("[src] is full."))
+/obj/item/clothing/mask/smokable/cigarette/use_after(obj/item/reagent_containers/glass/glass, mob/living/user, click_parameters)
+	if(!istype(glass))
+		return FALSE
+	if(!glass.is_open_container())
+		to_chat(user, SPAN_NOTICE("You need to take the lid off first."))
+		return TRUE
+
+	var/transfered = glass.reagents.trans_to_obj(src, chem_volume)
+	if(transfered)
+		to_chat(user, SPAN_NOTICE("You dip \the [src] into \the [glass]."))
+	else
+		if(!glass.reagents.total_volume)
+			to_chat(user, SPAN_NOTICE("[glass] is empty."))
+		else
+			to_chat(user, SPAN_NOTICE("[src] is full."))
+	return TRUE
 
 /obj/item/clothing/mask/smokable/cigarette/attack_self(mob/user)
 	if(lit == 1)
@@ -505,7 +504,7 @@
 
 /obj/item/clothing/mask/smokable/pipe/extinguish(mob/user, no_message)
 	..()
-	new /obj/effect/decal/cleanable/ash(get_turf(src))
+	new /obj/decal/cleanable/ash(get_turf(src))
 	if(ismob(loc))
 		var/mob/living/M = loc
 		if (!no_message)
@@ -522,7 +521,7 @@
 	else if (smoketime)
 		var/turf/location = get_turf(user)
 		user.visible_message(SPAN_NOTICE("[user] empties out [src]."), SPAN_NOTICE("You empty out [src]."))
-		new /obj/effect/decal/cleanable/ash(location)
+		new /obj/decal/cleanable/ash(location)
 		smoketime = 0
 		reagents.clear_reagents()
 		SetName("empty [initial(name)]")

@@ -22,14 +22,14 @@ var/global/list/artefact_feedback = list(/obj/structure/closet/wizard/armor = 		
 	name = "master spell book"
 	desc = "The legendary book of spells of the wizard."
 	icon = 'icons/obj/library.dmi'
-	icon_state = "spellbook"
+	icon_state = "book"
 	throw_speed = 1
 	throw_range = 5
 	w_class = ITEM_SIZE_NORMAL
 	var/uses = 1
 	var/temp = null
 	var/datum/spellbook/spellbook
-	var/spellbook_type = /datum/spellbook/ //for spawning specific spellbooks.
+	var/spellbook_type = /datum/spellbook //for spawning specific spellbooks.
 	var/investing_time = 0 //what time we target forr a return on our spell investment.
 	var/has_sacrificed = 0 //whether we have already got our sacrifice bonus for the current investment.
 

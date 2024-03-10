@@ -167,7 +167,7 @@
 	var/sound_id
 	var/damaged = FALSE
 	var/disabled
-	var/datum/effect/effect/system/spark_spread/sparks
+	var/datum/effect/spark_spread/sparks
 
 
 /obj/item/shield/energy/Destroy()
@@ -185,7 +185,7 @@
 /obj/item/shield/energy/on_update_icon()
 	icon_state = "eshield[active]"
 	if (active)
-		set_light(0.6, 0.1, 2, 1, "#006aff")
+		set_light(1.5, 1.5, "#006aff")
 	else
 		set_light(0)
 
@@ -235,12 +235,13 @@
 		force = initial(force)
 		w_class = initial(w_class)
 
+	update_icon()
+
 	if (istype(user,/mob/living/carbon/human))
 		var/mob/living/carbon/human/H = user
 		H.update_inv_l_hand()
 		H.update_inv_r_hand()
 
-	update_icon()
 	addtimer(new Callback(src, /obj/item/shield/energy/proc/UpdateSoundLoop), 0.1 SECONDS)
 
 
@@ -270,6 +271,7 @@
 
 
 /obj/item/shield/energy/emp_act(severity)
+	SHOULD_CALL_PARENT(FALSE)
 	if (!active)
 		return
 	if (damaged)
@@ -279,7 +281,7 @@
 		disabletime = 1 MINUTES
 
 	visible_message(SPAN_DANGER("\The [src] violently shudders!"))
-	new /obj/effect/overlay/self_deleting/emppulse(get_turf(src))
+	new /obj/overlay/self_deleting/emppulse(get_turf(src))
 
 	disabled = world.time + disabletime
 	damaged = TRUE
@@ -289,6 +291,7 @@
 	else
 		deactivate()
 	update_icon()
+	GLOB.empd_event.raise_event(src, severity)
 
 
 /obj/item/shield/energy/proc/UpdateSoundLoop()

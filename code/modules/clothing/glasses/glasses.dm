@@ -129,6 +129,13 @@
 	desc = "Used for seeing walls, floors, and stuff through anything. This set has corrective lenses."
 	prescription = 5
 
+/obj/item/clothing/glasses/meson/aviators
+	name = "HUD aviators"
+	desc = "A meson HUD integrated into a pair of aviator sunglasses. It does little to protect against the sun, but it sure looks cool."
+	icon_state = "meson_avi_on"
+	off_state = "avi_off"
+	item_state = "meson_avi_on"
+
 /obj/item/clothing/glasses/science
 	name = "science goggles"
 	desc = "Goggles fitted with a portable analyzer capable of determining the fabricator training potential of an item or components of a machine. Sensitive to EMP."
@@ -165,6 +172,13 @@
 	. = ..()
 	overlay = GLOB.global_hud.nvg
 
+/obj/item/clothing/glasses/night/aviators
+	name = "HUD aviators"
+	desc = "Night-vision glasses integrated into a pair of aviator sunglasses. It does little to protect against the sun, but it sure looks cool."
+	icon_state = "nvg_avi_on"
+	off_state = "avi_off"
+	item_state = "nvg_avi_on"
+
 /obj/item/clothing/glasses/tacgoggles
 	name = "tactical goggles"
 	desc = "Self-polarizing goggles with light amplification for dark environments. Made from durable synthetic."
@@ -173,7 +187,6 @@
 	darkness_view = 5
 	action_button_name = "Toggle Goggles"
 	toggleable = TRUE
-	see_invisible = SEE_INVISIBLE_NOLIGHTING
 	siemens_coefficient = 0.6
 	electric = TRUE
 

@@ -6,7 +6,6 @@
 	icon_state = "stunbaton"
 	item_state = "baton"
 	slot_flags = SLOT_BELT
-	item_flags = ITEM_FLAG_TRY_ATTACK
 	force = 15
 	throwforce = 7
 	w_class = ITEM_SIZE_NORMAL
@@ -63,7 +62,7 @@
 		icon_state = "[initial(name)]"
 
 	if(icon_state == "[initial(name)]_active")
-		set_light(0.4, 0.1, 1, 2, "#ff6a00")
+		set_light(1.5, 2, "#ff6a00")
 	else
 		set_light(0)
 
@@ -106,8 +105,7 @@
 /obj/item/melee/baton/throw_impact(atom/hit_atom, datum/thrownthing/TT)
 	if(istype(hit_atom,/mob/living))
 		apply_hit_effect(hit_atom, hit_zone = ran_zone(TT.target_zone, 30))//more likely to hit the zone you target!
-	else
-		..()
+	..()
 
 /obj/item/melee/baton/proc/set_status(newstatus, mob/user)
 	if(bcell && bcell.charge >= hitcost)
@@ -130,7 +128,7 @@
 		status = s
 		update_icon()
 
-/obj/item/melee/baton/attack(mob/M, mob/user)
+/obj/item/melee/baton/use_before(mob/M, mob/user)
 	. = FALSE
 	if (!istype(M))
 		return FALSE
@@ -241,7 +239,7 @@
 /obj/item/melee/baton/robot/electrified_arm/on_update_icon()
 	if(status)
 		icon_state = "electrified_arm_active"
-		set_light(0.4, 0.1, 1, 2, "#006aff")
+		set_light(1.5, 2, "#006aff")
 	else
 		icon_state = "electrified_arm"
 		set_light(0)

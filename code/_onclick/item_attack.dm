@@ -34,8 +34,9 @@ avoid code duplication. This includes items that may sometimes act as a standard
 /**
  * Called when the item is in the active hand and another atom is clicked. This is generally called by `ClickOn()`.
  *
- * This passes down to `attack()`, `use_user()`, `use_grab()`, `use_weapon()`, `use_tool()`, `attackby()`, and
- * `use_on()`, in that order, depending on item flags and user's intent.
+ * This passes down to `use_before()`, `use_weapon()`, `use_tool()`, `attackby()`, and then use_after() in that order,
+ * depending on item flags and user's intent.
+ * use_grab() is run in an override of resolve_attackby() processed at the grab's level, and is not part of this chain.
  *
  * **Parameters**:
  * - `atom` - The atom that was clicked.
@@ -49,12 +50,9 @@ avoid code duplication. This includes items that may sometimes act as a standard
 		return FALSE
 	atom.pre_use_item(src, user, click_params)
 	var/use_call
-	if (HAS_FLAGS(item_flags, ITEM_FLAG_TRY_ATTACK))
-		use_call = "on"
-		. = use_on(atom, user, click_params)
-		if (!.)
-			use_call = "attack"
-			. = attack(atom, user)
+
+	use_call = "use"
+	. = use_before(atom, user, click_params)
 	if (!. && user.a_intent == I_HURT)
 		use_call = "weapon"
 		. = atom.use_weapon(src, user, click_params)
@@ -64,9 +62,9 @@ avoid code duplication. This includes items that may sometimes act as a standard
 	if (!.)
 		use_call = "attackby"
 		. = atom.attackby(src, user, click_params)
-	if (!. && !HAS_FLAGS(item_flags, ITEM_FLAG_TRY_ATTACK))
-		use_call = "on"
-		. = use_on(atom, user, click_params)
+	if (!.)
+		use_call = "use"
+		. = use_after(atom, user, click_params)
 	if (!.)
 		use_call = null
 	atom.post_use_item(src, user, ., use_call, click_params)
@@ -186,7 +184,7 @@ avoid code duplication. This includes items that may sometimes act as a standard
 		return FALSE
 
 	// Target checks
-	if (!Adjacent(target))
+	if (isturf(target.loc) && !Adjacent(target))
 		if (!silent)
 			FEEDBACK_FAILURE(src, "You must remain next to \the [target].")
 		return FALSE
@@ -217,10 +215,15 @@ avoid code duplication. This includes items that may sometimes act as a standard
 			if (!silent)
 				FEEDBACK_UNEQUIP_FAILURE(src, tool)
 			return FALSE
-		if (HAS_FLAGS(flags, SANITY_CHECK_TOOL_IN_HAND) && get_active_hand() != tool)
-			if (!silent)
-				FEEDBACK_FAILURE(src, "\The [tool] must stay in your active hand.")
-			return FALSE
+		if (HAS_FLAGS(flags, SANITY_CHECK_TOOL_IN_HAND))
+			var/active = get_active_hand()
+			if (istype(active, /obj/item/gripper))
+				var/obj/item/gripper/gripper = active
+				active = gripper.wrapped
+			if (active != tool)
+				if (!silent)
+					FEEDBACK_FAILURE(src, "\The [tool] must stay in your active hand.")
+				return FALSE
 	return TRUE
 
 
@@ -349,6 +352,7 @@ avoid code duplication. This includes items that may sometimes act as a standard
  * resolve chain will be called.
  */
 /atom/proc/use_tool(obj/item/tool, mob/living/user, list/click_params)
+	SHOULD_CALL_PARENT(TRUE)
 	return FALSE
 
 
@@ -394,8 +398,7 @@ avoid code duplication. This includes items that may sometimes act as a standard
 
 /**
  * Called when the item is in the active hand and another atom is clicked and `resolve_attackby()` returns FALSE. This is generally called by `ClickOn()`.
- * Use this similar to how attack() is used; but for non-mob targets. Whenever you want specific behavior at the item level.
- * Also works on ranged targets, unlike attack()
+ * Works on ranged targets, unlike resolve_attackby()
  *
  * **Parameters**:
  * - `target` - The atom that was clicked on.
@@ -412,6 +415,8 @@ avoid code duplication. This includes items that may sometimes act as a standard
 /**
  * Called when the item is in the active hand and another atom is clicked. This is generally called by the target's
  * `resolve_attackby()` proc.
+ * Use it for item-level behavior you don't necessarily want running before use_tool/use_weapon.
+ * You will need to use type checks on atom/target on overrides; or else this will be called on anything you click.
  *
  * **Parameters**:
  * - `target` - The atom that was clicked on.
@@ -420,22 +425,22 @@ avoid code duplication. This includes items that may sometimes act as a standard
  *
  * Returns boolean to indicate whether the use call was handled or not.
  */
-/obj/item/proc/use_on(atom/target, mob/user, click_parameters)
+/obj/item/proc/use_after(atom/target, mob/living/user, click_parameters)
 	return FALSE
 
 
-//I would prefer to rename this attack_as_weapon(), but that would involve touching hundreds of files.
 /**
- * Called when a mob is clicked while the item is in the active hand and ITEM_FLAG_TRY_ATTACK is set. Generally called by the mob's `attackby()` proc.
- * This is called before anything else if set correctly. Returns boolean to indicate whether the item usage was successful or not.
+ * Called when a mob is clicked while the item is in the active hand. This is usually called first by the mob's `resolve_attackby()` proc.
+ * Use this to set item-level overrides that you want running first. If you have an override you don't want running before use_tool and use_weapon, put it in use_after().
+ * You will need to use type checks on atom/target on overrides; or else this will be called on anything you click.
  * If returns FALSE, the rest of the resolve_attackby() chain is called.
  *
  * **Parameters**:
- * - `subject` - The mob that was clicked.
+ * - `target` - The atom that was clicked.
  * - `user` - The mob that clicked the target.
  * * - `click_parameters` - List of click parameters. See BYOND's `Click()` documentation.
  */
-/obj/item/proc/attack(mob/living/subject, mob/living/user, click_parameters)
+/obj/item/proc/use_before(atom/target, mob/living/user, click_parameters)
 	return FALSE
 
 
@@ -452,8 +457,6 @@ avoid code duplication. This includes items that may sometimes act as a standard
  */
 /obj/item/proc/apply_hit_effect(mob/living/target, mob/living/user, hit_zone)
 	var/power = force
-	if (MUTATION_HULK in user.mutations && damtype == DAMAGE_BRUTE) //Repeat this check here because it is only used under use_weapon to check if it's even possible to damage the mob. Value not carried over here.
-		power *= 2
 	return target.hit_with_weapon(src, user, power, hit_zone)
 
 

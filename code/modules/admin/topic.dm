@@ -1361,7 +1361,7 @@
 	// call dibs on IC messages (prays, emergency comms, faxes)
 	else if(href_list["take_ic"])
 
-		var/mob/M = locate(href_list["take_question"])
+		var/mob/M = locate(href_list["take_ic"])
 		if(ismob(M))
 			var/take_msg = SPAN_NOTICE("<b>[key_name(usr.client)]</b> is attending to <b>[key_name(M)]'s</b> message.")
 			for(var/client/X as anything in GLOB.admins)
@@ -1486,8 +1486,8 @@
 		log_admin("[key_name(M)] has been hit by Bluespace Artillery fired by [src.owner]")
 		message_admins("[key_name(M)] has been hit by Bluespace Artillery fired by [src.owner]")
 
-		var/obj/effect/stop/S
-		S = new /obj/effect/stop(M.loc)
+		var/obj/stop/S
+		S = new /obj/stop(M.loc)
 		S.victim = M
 		spawn(20)
 			qdel(S)
@@ -1591,6 +1591,7 @@
 		P.admindatum = src
 		P.origin = replyorigin
 
+		P.department = fax.department
 		P.destinations = get_fax_machines_by_department(fax.department)
 		P.sender = sender
 
@@ -1691,7 +1692,7 @@
 				if(!check_rights(R_FUN,0))
 					removed_paths += dirty_path
 					continue
-			else if(ispath(path, /obj/effect/bhole))
+			else if(ispath(path, /obj/bhole))
 				if(!check_rights(R_FUN,0))
 					removed_paths += dirty_path
 					continue

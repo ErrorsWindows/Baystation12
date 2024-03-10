@@ -36,9 +36,9 @@ var/global/list/mob_hat_cache = list()
 	lawupdate = FALSE
 	density = TRUE
 	req_access = list(access_engine, access_robotics)
-	integrated_light_max_bright = 0.5
+	integrated_light_power = 0.5
 	local_transmit = 1
-	possession_candidate = 1
+	possession_candidate = TRUE
 
 	can_pull_size = ITEM_SIZE_NORMAL
 	can_pull_mobs = MOB_PULL_SMALLER

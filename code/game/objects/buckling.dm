@@ -9,6 +9,10 @@
 	var/buckle_require_restraints = FALSE //require people to be handcuffed before being able to buckle. eg: pipes
 	var/mob/living/buckled_mob
 	var/buckle_sound = 'sound/effects/buckle.ogg'
+	var/breakout_time
+
+	///Verb used when the object is punched. If defined, overrides the punch's usual verb
+	var/attacked_verb
 
 	/**
 	*  A list of (x, y, z) to offset buckled_mob by, or null.
@@ -102,7 +106,7 @@
 			to_chat(user, SPAN_WARNING("\The [target] must be restrained to buckle them to \the [src]."))
 		return FALSE
 	if (user)
-		if (user.incapacitated())
+		if (user != target && user.incapacitated())
 			if (!silent)
 				to_chat(user, SPAN_WARNING("You're in no condition to buckle things right now."))
 			return FALSE

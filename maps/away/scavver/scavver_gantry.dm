@@ -29,7 +29,7 @@
 	)
 	spawn_weight = 0.67
 
-/obj/effect/submap_landmark/joinable_submap/scavver_gantry
+/obj/submap_landmark/joinable_submap/scavver_gantry
 	name =  "Salvage Gantry"
 	archetype = /singleton/submap_archetype/derelict/scavver_gantry
 
@@ -42,7 +42,7 @@
 		/datum/job/submap/scavver_engineer
 	)
 
-/obj/effect/overmap/visitable/ship/scavver_gantry
+/obj/overmap/visitable/ship/scavver_gantry
 	name = "Unknown Vessel"
 	desc = "Sensor array detects a medium-sized vessel of irregular shape. Vessel origin is unidentifiable."
 	vessel_mass = 3600
@@ -193,13 +193,3 @@
 	suit= /obj/item/clothing/suit/space/void/engineering/salvage
 	helmet = /obj/item/clothing/head/helmet/space/void/engineering/salvage/pilot
 	mask = /obj/item/clothing/mask/breath
-
-/obj/structure/closet/secure_closet/freezer/fridge/scavver
-	req_access = list()
-
-/obj/structure/closet/secure_closet/freezer/fridge/scavver/WillContain()
-	return list(
-		/obj/item/reagent_containers/food/drinks/milk = 6,
-		/obj/item/reagent_containers/food/drinks/soymilk = 4,
-		/obj/item/storage/fancy/egg_box/full = 4
-	)

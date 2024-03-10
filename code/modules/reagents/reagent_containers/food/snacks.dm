@@ -3,7 +3,6 @@
 	desc = "Yummy!"
 	icon = 'icons/obj/food/food.dmi'
 	center_of_mass = "x=16;y=16"
-	item_flags = ITEM_FLAG_TRY_ATTACK
 	var/bitesize = 1
 	var/bitecount = 0
 	var/slice_path
@@ -56,7 +55,7 @@
 	return
 
 
-/obj/item/reagent_containers/food/snacks/attack(mob/M as mob, mob/user as mob)
+/obj/item/reagent_containers/food/snacks/use_before(mob/M as mob, mob/user as mob)
 	. = FALSE
 	if (!istype(M, /mob/living/carbon))
 		return FALSE
@@ -232,22 +231,22 @@
 			something.dropInto(loc)
 	. = ..()
 
-/obj/item/reagent_containers/food/snacks/afterattack(obj/item/reagent_containers/food/drinks/glass2/glass, mob/user, proximity)
-	..()
-	if(!proximity)
-		return
-	if(istype(glass))
-		if(w_class != ITEM_SIZE_TINY)
-			to_chat(user, SPAN_NOTICE("\The [src] is too big to properly dip in \the [glass]."))
-			return
-		var/transfered = glass.reagents.trans_to_obj(src, volume)
-		if(transfered)	//if reagents were transfered, show the message
-			to_chat(user, SPAN_NOTICE("You dip \the [src] into \the [glass]."))
-		else			//if not, either the glass was empty, or the food was full
-			if(!glass.reagents.total_volume)
-				to_chat(user, SPAN_NOTICE("\The [glass] is empty."))
-			else
-				to_chat(user, SPAN_NOTICE("\The [src] is full."))
+/obj/item/reagent_containers/food/snacks/use_after(obj/item/reagent_containers/food/drinks/glass2/glass, mob/user)
+	if(!istype(glass))
+		return FALSE
+	if(w_class != ITEM_SIZE_TINY)
+		to_chat(user, SPAN_NOTICE("\The [src] is too big to properly dip in \the [glass]."))
+		return TRUE
+
+	var/transfered = glass.reagents.trans_to_obj(src, volume)
+	if(transfered)	//if reagents were transfered, show the message
+		to_chat(user, SPAN_NOTICE("You dip \the [src] into \the [glass]."))
+	else			//if not, either the glass was empty, or the food was full
+		if(!glass.reagents.total_volume)
+			to_chat(user, SPAN_NOTICE("\The [glass] is empty."))
+		else
+			to_chat(user, SPAN_NOTICE("\The [src] is full."))
+	return TRUE
 
 ////////////////////////////////////////////////////////////////////////////////
 /// FOOD END
@@ -323,19 +322,20 @@
 	.=..()
 	reagents.add_reagent(/datum/reagent/nutriment/protein/egg, 3)
 
-/obj/item/reagent_containers/food/snacks/egg/afterattack(obj/O as obj, mob/user as mob, proximity)
+/obj/item/reagent_containers/food/snacks/egg/use_after(obj/O, mob/living/user, click_parameters)
 	if(istype(O,/obj/machinery/microwave))
-		return ..()
-	if(!(proximity && O.is_open_container()))
-		return
+		return FALSE
+	if(!O.is_open_container())
+		return TRUE
 	to_chat(user, "You crack \the [src] into \the [O].")
 	reagents.trans_to(O, reagents.total_volume)
 	qdel(src)
+	return TRUE
 
 /obj/item/reagent_containers/food/snacks/egg/throw_impact(atom/hit_atom)
 	if(QDELETED(src))
 		return // Could potentially happen with unscupulous atoms on hitby() throwing again, etc.
-	new/obj/effect/decal/cleanable/egg_smudge(src.loc)
+	new/obj/decal/cleanable/egg_smudge(src.loc)
 	reagents.splash(hit_atom, reagents.total_volume)
 	visible_message(SPAN_WARNING("\The [src] has been squashed!"),SPAN_WARNING("You hear a smack."))
 	..()
@@ -768,7 +768,7 @@
 
 /obj/item/reagent_containers/food/snacks/pie/throw_impact(atom/hit_atom)
 	..()
-	new/obj/effect/decal/cleanable/pie_smudge(src.loc)
+	new/obj/decal/cleanable/pie_smudge(src.loc)
 	src.visible_message(SPAN_DANGER("\The [src.name] splats."),SPAN_DANGER("You hear a splat."))
 	qdel(src)
 
@@ -1388,6 +1388,7 @@
 
 /obj/item/reagent_containers/food/snacks/monkeycube/OnConsume(mob/living/consumer, mob/living/feeder)
 	set waitfor = FALSE
+	..()
 	if (ishuman(consumer))
 		var/mob/living/carbon/human/human = consumer
 		to_chat(human, FONT_LARGE(SPAN_DANGER("Something is very wrong ...")))
@@ -1405,7 +1406,8 @@
 		human.AdjustStunned(5)
 	else
 		consumer.kill_health()
-	Expand()
+	var/mob/monkey = new monkey_type
+	monkey.dropInto(consumer.loc)
 
 /obj/item/reagent_containers/food/snacks/monkeycube/on_reagent_change()
 	if(reagents.has_reagent(/datum/reagent/water))
@@ -1447,11 +1449,11 @@
 
 /obj/item/reagent_containers/food/snacks/monkeycube/spidercube
 	name = "spider cube"
-	monkey_type = /obj/effect/spider/spiderling
+	monkey_type = /obj/spider/spiderling
 
 /obj/item/reagent_containers/food/snacks/monkeycube/wrapped/spidercube
 	name = "spider cube"
-	monkey_type = /obj/effect/spider/spiderling
+	monkey_type = /obj/spider/spiderling
 
 /obj/item/reagent_containers/food/snacks/monkeycube/pikecube
 	name = "strange-looking monkey cube"
@@ -1531,14 +1533,17 @@
 
 /obj/item/reagent_containers/food/snacks/corpse_cube/OnConsume(mob/living/consumer, mob/living/feeder)
 	set waitfor = FALSE
+	..()
 	if (ishuman(consumer))
 		var/mob/living/carbon/human/human = consumer
 		to_chat(human, FONT_LARGE(SPAN_DANGER("You feel something shifting and slithering throughout your body ...")))
 		var/obj/item/organ/external/organ = human.get_organ(BP_CHEST)
 		var/obj/item/organ/external/unluckylimb1 = human.get_organ(pick(BP_ALL_LIMBS))
 		var/obj/item/organ/external/unluckylimb2 = human.get_organ(pick(BP_ALL_LIMBS))
+		sleep(3 SECONDS)
 		organ.add_pain(30)
 		organ.fracture()
+		sleep(3 SECONDS)
 		unluckylimb1.add_pain(50)
 		unluckylimb1.fracture()
 		unluckylimb2.add_pain(50)
@@ -2755,7 +2760,7 @@
 
 	var/open = 0 // Is the box open?
 	var/ismessy = 0 // Fancy mess on the lid
-	var/obj/item/reagent_containers/food/snacks/sliceable/pizza/pizza // content pizza
+	var/obj/item/reagent_containers/food/snacks/sliceable/pizza // content pizza
 	var/list/boxes = list()// If the boxes are stacked, they come here
 	var/boxtag = ""
 
@@ -2764,30 +2769,35 @@
 	ClearOverlays()
 
 	// Set appropriate description
-	if( open && pizza )
+	if(open && pizza)
 		desc = "A box suited for pizzas. It appears to have a [pizza.name] inside."
-	else if( length(boxes) > 0 )
+	else if(length(boxes) > 0)
 		desc = "A pile of boxes suited for pizzas. There appears to be [length(boxes) + 1] boxes in the pile."
 
 		var/obj/item/pizzabox/topbox = boxes[length(boxes)]
 		var/toptag = topbox.boxtag
-		if( toptag != "" )
+		if(toptag != "")
 			desc = "[desc] The box on top has a tag, it reads: '[toptag]'."
 	else
 		desc = "A box suited for pizzas."
 
-		if( boxtag != "" )
+		if(boxtag != "")
 			desc = "[desc] The box has a tag, it reads: '[boxtag]'."
 
 	// Icon states and overlays
-	if( open )
-		if( ismessy )
+	if(open)
+		if(ismessy)
 			icon_state = "pizzabox_messy"
 		else
 			icon_state = "pizzabox_open"
 
-		if( pizza )
-			var/image/pizzaimg = image("food.dmi", icon_state = pizza.icon_state)
+		if(pizza)
+			var/image/pizzaimg = image(pizza.icon, icon_state = pizza.icon_state)
+			if (istype(pizza, /obj/item/reagent_containers/food/snacks/sliceable/variable/pizza))
+				var/image/filling = image("food_custom.dmi", icon_state = "pizza_filling")
+				filling.appearance_flags = DEFAULT_APPEARANCE_FLAGS | RESET_COLOR
+				filling.color = pizza.filling_color
+				pizzaimg.AddOverlays(filling)
 			pizzaimg.pixel_y = -3
 			AddOverlays(pizzaimg)
 
@@ -2795,70 +2805,70 @@
 	else
 		// Stupid code because byondcode sucks
 		var/doimgtag = 0
-		if( length(boxes) > 0 )
+		if(length(boxes) > 0)
 			var/obj/item/pizzabox/topbox = boxes[length(boxes)]
-			if( topbox.boxtag != "" )
+			if(topbox.boxtag != "")
 				doimgtag = 1
 		else
-			if( boxtag != "" )
+			if(boxtag != "")
 				doimgtag = 1
 
-		if( doimgtag )
+		if(doimgtag)
 			var/image/tagimg = image("food.dmi", icon_state = "pizzabox_tag")
 			tagimg.pixel_y = length(boxes) * 3
 			AddOverlays(tagimg)
 
 	icon_state = "pizzabox[length(boxes)+1]"
 
-/obj/item/pizzabox/attack_hand( mob/user as mob )
+/obj/item/pizzabox/attack_hand(mob/user as mob)
 
-	if( open && pizza )
-		user.put_in_hands( pizza )
+	if(open && pizza)
+		user.put_in_hands(pizza)
 
-		to_chat(user, SPAN_WARNING("You take \the [src.pizza] out of \the [src]."))
+		to_chat(user, SPAN_WARNING("You take \the [pizza] out of \the [src]."))
 		src.pizza = null
 		update_icon()
 		return
 
-	if( length(boxes) > 0 )
-		if( user.get_inactive_hand() != src )
+	if(length(boxes) > 0)
+		if(user.get_inactive_hand() != src)
 			..()
 			return
 
 		var/obj/item/pizzabox/box = boxes[length(boxes)]
 		boxes -= box
 
-		user.put_in_hands( box )
+		user.put_in_hands(box)
 		to_chat(user, SPAN_WARNING("You remove the topmost [src] from your hand."))
 		box.update_icon()
 		update_icon()
 		return
 	..()
 
-/obj/item/pizzabox/attack_self( mob/user as mob )
+/obj/item/pizzabox/attack_self(mob/user as mob)
 
-	if( length(boxes) > 0 )
+	if(length(boxes) > 0)
 		return
 
 	open = !open
 
-	if( open && pizza )
+	if(open && pizza)
 		ismessy = 1
 
 	update_icon()
 
 /obj/item/pizzabox/attackby( obj/item/I as obj, mob/user as mob )
-	if( istype(I, /obj/item/pizzabox) )
+	if(istype(I, /obj/item/pizzabox))
 		var/obj/item/pizzabox/box = I
 
-		if( !box.open && !src.open )
+		if(!box.open && !src.open)
 			// make a list of all boxes to be added
 			var/list/boxestoadd = list()
 			boxestoadd += box
 			for(var/obj/item/pizzabox/i in box.boxes)
 				boxestoadd += i
 
-			if( (length(boxes)+1) + length(boxestoadd) <= 5 )
+			if((length(boxes)+1) + length(boxestoadd) <= 5)
 				if(!user.unEquip(box, src))
 					return
 				box.boxes = list()// clear the box boxes so we don't have boxes inside boxes. - Xzibit
@@ -2875,16 +2885,16 @@
 
 		return
 
-	if( istype(I, /obj/item/reagent_containers/food/snacks/sliceable/pizza) )
-
-		if( src.open )
-			if(!user.unEquip(I, src))
-				return
-			src.pizza = I
-
-			update_icon()
-
-			to_chat(user, SPAN_WARNING("You put \the [I] in \the [src]!"))
+	if(istype(I, /obj/item/reagent_containers/food/snacks/sliceable/pizza) || istype(I, /obj/item/reagent_containers/food/snacks/sliceable/variable/pizza))
+		if(open)
+			if (!pizza)
+				if(!user.unEquip(I, src))
+					return
+				pizza = I
+				update_icon()
+				to_chat(user, SPAN_WARNING("You put \the [I] in \the [src]!"))
+			else
+				to_chat(user, SPAN_WARNING("There is already \a [pizza] in \the [src]!"))
 		else
 			to_chat(user, SPAN_WARNING("You try to push \the [I] through the lid but it doesn't work!"))
 		return

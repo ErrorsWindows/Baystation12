@@ -14,7 +14,6 @@
 	volume = 60
 	w_class = ITEM_SIZE_SMALL
 	atom_flags = ATOM_FLAG_OPEN_CONTAINER
-	item_flags = ITEM_FLAG_TRY_ATTACK
 	unacidable = TRUE
 
 
@@ -67,7 +66,7 @@
 		atom_flags |= ATOM_FLAG_OPEN_CONTAINER
 	update_icon()
 
-/obj/item/reagent_containers/glass/attack(mob/M as mob, mob/user as mob)
+/obj/item/reagent_containers/glass/use_before(mob/M as mob, mob/user as mob)
 	. = FALSE
 	if (!istype(M))
 		return FALSE
@@ -123,10 +122,11 @@
 			)
 		playsound(src.loc, "sound/effects/Glasshit.ogg", 50)
 
-/obj/item/reagent_containers/glass/afterattack(obj/target, mob/user, proximity)
-	if (!proximity || (target.type in can_be_placed_into) || standard_dispenser_refill(user, target) || standard_pour_into(user, target))
+/obj/item/reagent_containers/glass/use_after(obj/target, mob/living/user, click_parameters)
+	if ((target.type in can_be_placed_into) || standard_dispenser_refill(user, target) || standard_pour_into(user, target))
 		return TRUE
 	splashtarget(target, user)
+	return TRUE
 
 
 /obj/item/reagent_containers/glass/beaker

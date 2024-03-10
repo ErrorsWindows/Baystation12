@@ -17,9 +17,11 @@
 	..()
 	update_icon()
 
-/obj/item/glass_jar/afterattack(atom/A, mob/user, proximity)
-	if(!proximity || contains)
-		return
+/obj/item/glass_jar/use_after(atom/A, mob/living/user, click_parameters)
+	if(contains)
+		to_chat(user, SPAN_WARNING("\The [src] is full and cannot accept further items."))
+		return TRUE
+
 	if(istype(A, /mob))
 		var/accept = 0
 		for(var/D in accept_mobs)
@@ -27,21 +29,22 @@
 				accept = 1
 		if(!accept)
 			to_chat(user, "[A] doesn't fit into \the [src].")
-			return
+			return TRUE
 		var/mob/L = A
 		user.visible_message(SPAN_NOTICE("[user] scoops [L] into \the [src]."), SPAN_NOTICE("You scoop [L] into \the [src]."))
 		L.forceMove(src)
 		contains = 2
 		update_icon()
-		return
-	else if(istype(A, /obj/effect/spider/spiderling))
-		var/obj/effect/spider/spiderling/S = A
+		return TRUE
+
+	if (istype(A, /obj/spider/spiderling))
+		var/obj/spider/spiderling/S = A
 		user.visible_message(SPAN_NOTICE("[user] scoops [S] into \the [src]."), SPAN_NOTICE("You scoop [S] into \the [src]."))
 		S.forceMove(src)
 		STOP_PROCESSING(SSobj, S) // No growing inside jars
 		contains = 3
 		update_icon()
-		return
+		return TRUE
 
 /obj/item/glass_jar/attack_self(mob/user)
 	switch(contains)
@@ -60,7 +63,7 @@
 			update_icon()
 			return
 		if(3)
-			for(var/obj/effect/spider/spiderling/S in src)
+			for(var/obj/spider/spiderling/S in src)
 				S.dropInto(user.loc)
 				user.visible_message(SPAN_NOTICE("[user] releases [S] from \the [src]."), SPAN_NOTICE("You release [S] from \the [src]."))
 				START_PROCESSING(SSobj, S) // They can grow after being let out though
@@ -93,7 +96,7 @@
 			for(var/obj/item/spacecash/S in src)
 				var/list/moneyImages = S.getMoneyImages()
 				for(var/A in moneyImages)
-					var/image/money = image('icons/obj/jars.dmi', A)
+					var/image/money = image('icons/obj/money.dmi', A)
 					money.pixel_x = rand(-2, 3)
 					money.pixel_y = rand(-6, 6)
 					money.SetTransform(scale = 0.6)
@@ -106,7 +109,7 @@
 				SetName("glass jar with [M]")
 				desc = "A small jar with [M] inside."
 		if(3)
-			for(var/obj/effect/spider/spiderling/S in src)
+			for(var/obj/spider/spiderling/S in src)
 				var/image/victim = image(S.icon, S.icon_state)
 				underlays += victim
 				SetName("glass jar with [S]")

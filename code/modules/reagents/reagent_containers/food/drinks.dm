@@ -7,7 +7,6 @@
 	icon = 'icons/obj/food/drinks.dmi'
 	icon_state = null
 	atom_flags = ATOM_FLAG_OPEN_CONTAINER
-	item_flags = ITEM_FLAG_TRY_ATTACK
 	amount_per_transfer_from_this = 5
 	volume = 50
 	var/filling_states   // List of percentages full that have icons
@@ -30,7 +29,7 @@
 	to_chat(user, SPAN_NOTICE("You open \the [src] with an audible pop!"))
 	atom_flags |= ATOM_FLAG_OPEN_CONTAINER
 
-/obj/item/reagent_containers/food/drinks/attack(mob/M as mob, mob/user as mob)
+/obj/item/reagent_containers/food/drinks/use_before(mob/M as mob, mob/user as mob)
 	. = FALSE
 	if (!istype(M))
 		return FALSE
@@ -40,14 +39,9 @@
 	if(standard_feed_mob(user, M))
 		return TRUE
 
-/obj/item/reagent_containers/food/drinks/afterattack(obj/target, mob/user, proximity)
-	if(!proximity) return
-
-	if(standard_dispenser_refill(user, target))
-		return
-	if(standard_pour_into(user, target))
-		return
-	return ..()
+/obj/item/reagent_containers/food/drinks/use_after(obj/target, mob/living/user, click_parameters)
+	if (standard_dispenser_refill(user, target) || standard_pour_into(user, target))
+		return TRUE
 
 /obj/item/reagent_containers/food/drinks/standard_feed_mob(mob/user, mob/target)
 	if(!is_open_container())

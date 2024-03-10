@@ -28,30 +28,29 @@
 
 /mob/living/simple_animal/attack_hand(mob/living/carbon/human/M as mob)
 	..()
-
-	switch(M.a_intent)
-
-		if(I_HELP)
+	switch (M.a_intent)
+		if (I_HELP)
 			if (health > 0)
-				M.visible_message(SPAN_NOTICE("[M] [response_help] \the [src]."))
+				M.visible_message(SPAN_NOTICE("\The [M] [response_help] \the [src]."))
 				M.update_personal_goal(/datum/goal/achievement/specific_object/pet, type)
 
-		if(I_DISARM)
-			M.visible_message(SPAN_NOTICE("[M] [response_disarm] \the [src]."))
+		if (I_DISARM)
+			M.visible_message(SPAN_NOTICE("\The [M] [response_disarm] \the [src]."))
 			M.do_attack_animation(src)
 
-		if(I_HURT)
+		if (I_HURT)
 			var/dealt_damage = harm_intent_damage
 			var/harm_verb = response_harm
-			if(ishuman(M) && M.species)
+			if (ishuman(M) && M.species)
 				var/datum/unarmed_attack/attack = M.get_unarmed_attack(src)
 				dealt_damage = attack.damage <= dealt_damage ? dealt_damage : attack.damage
 				harm_verb = pick(attack.attack_verb)
+				playsound(loc, attack.attack_sound, 25, 1, -1)
 				if(attack.sharp || attack.edge)
 					adjustBleedTicks(dealt_damage)
 
 			adjustBruteLoss(dealt_damage)
-			M.visible_message(SPAN_WARNING("[M] [harm_verb] \the [src]!"))
+			M.visible_message(SPAN_WARNING("\The [M] [harm_verb] \the [src]!"))
 			M.do_attack_animation(src)
 
 			if (ai_holder)
@@ -120,12 +119,6 @@
 		return TRUE
 
 	return ..()
-
-/mob/living/simple_animal/post_use_item(obj/item/tool, mob/living/user, interaction_handled, use_call)
-	if (interaction_handled && ai_holder && (use_call == "attack" || use_call == "weapon"))
-		ai_holder.react_to_attack(user)
-	..()
-
 
 /mob/living/simple_animal/hit_with_weapon(obj/item/O, mob/living/user, effective_force, hit_zone)
 	if(O.force <= resistance)

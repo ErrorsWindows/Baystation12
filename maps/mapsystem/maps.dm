@@ -120,6 +120,9 @@ var/global/const/MAP_HAS_RANK = 2		//Rank system, also togglable
 	var/local_currency_name_singular = "thaler"
 	var/local_currency_name_short = "T"
 
+	//Whether or not the map should include the Interlude in teleports and the BSD event as a possibility.
+	var/use_bluespace_interlude = FALSE
+
 	var/game_year
 
 	var/list/available_cultural_info = list(
@@ -169,13 +172,25 @@ var/global/const/MAP_HAS_RANK = 2		//Rank system, also togglable
 			CULTURE_HUMAN_BELTER,
 			CULTURE_HUMAN_PLUTO,
 			CULTURE_HUMAN_EARTH,
-			CULTURE_HUMAN_CETI,
+			CULTURE_HUMAN_CETIN,
+			CULTURE_HUMAN_CETIS,
+			CULTURE_HUMAN_CETII,
 			CULTURE_HUMAN_SPACER,
-			CULTURE_HUMAN_SPAFRO,
-			CULTURE_HUMAN_CONFED,
+			CULTURE_HUMAN_OFFWORLD,
+			CULTURE_HUMAN_CONFEDC,
+			CULTURE_HUMAN_CONFEDO,
+			CULTURE_HUMAN_FOSTER,
+			CULTURE_HUMAN_PIRXL,
+			CULTURE_HUMAN_PIRXB,
+			CULTURE_HUMAN_PIRXF,
+			CULTURE_HUMAN_TADMOR,
+			CULTURE_HUMAN_IOLAUS,
+			CULTURE_HUMAN_BRAHE,
+			CULTURE_HUMAN_EOS,
+			CULTURE_HUMAN_CONFEDC,
+			CULTURE_HUMAN_CONFEDO,
 			CULTURE_HUMAN_GAIAN,
-			CULTURE_HUMAN_OTHER,
-			CULTURE_OTHER
+			CULTURE_HUMAN_OTHER
 		),
 		TAG_RELIGION = list(
 			RELIGION_UNSTATED,
@@ -406,8 +421,8 @@ var/global/const/MAP_HAS_RANK = 2		//Rank system, also togglable
 		return
 
 	for(var/i = 0, i < num_exoplanets, i++)
-		var/exoplanet_type = pick(subtypesof(/obj/effect/overmap/visitable/sector/exoplanet))
-		var/obj/effect/overmap/visitable/sector/exoplanet/new_planet = new exoplanet_type(null, planet_size[1], planet_size[2])
+		var/exoplanet_type = pick(subtypesof(/obj/overmap/visitable/sector/exoplanet))
+		var/obj/overmap/visitable/sector/exoplanet/new_planet = new exoplanet_type(null, planet_size[1], planet_size[2])
 		new_planet.build_level()
 
 // Used to apply various post-compile procedural effects to the map.
@@ -437,7 +452,7 @@ var/global/const/MAP_HAS_RANK = 2		//Rank system, also togglable
 	return text2num(pickweight(candidates))
 
 /datum/map/proc/get_empty_zlevel()
-	if(empty_levels == null)
+	if(isnull(empty_levels))
 		INCREMENT_WORLD_Z_SIZE
 		empty_levels = list(world.maxz)
 	return pick(empty_levels)
@@ -596,5 +611,8 @@ var/global/const/MAP_HAS_RANK = 2		//Rank system, also togglable
 		desc += "There were <b>no survivors</b>, <b>[data["offship_players"]] off-ship player(s)</b>, (<b>[data["ghosts"]] ghosts</b>)."
 
 	return desc
+
+/datum/map/proc/do_interlude_teleport(atom/movable/target, atom/destination, duration, precision, type)
+	return
 
 #undef DEFAULT_GAME_YEAR_OFFSET

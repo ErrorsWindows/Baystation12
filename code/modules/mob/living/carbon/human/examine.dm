@@ -107,7 +107,7 @@
 	//shoes
 	if(shoes && !skipshoes)
 		msg += "[P.He] [P.is] wearing [shoes.get_examine_line()] on [P.his] feet.\n"
-	else if(feet_blood_DNA)
+	else if(feet_blood_color)
 		msg += "[SPAN_WARNING("[P.He] [P.has] [(feet_blood_color != SYNTH_BLOOD_COLOUR) ? "blood" : "oil"]-stained feet!")]\n"
 
 	//mask
@@ -158,6 +158,9 @@
 				msg += E.species.disfigure_msg(src)
 			else //Just in case they lack a species for whatever reason.
 				msg += "[SPAN_WARNING("[P.His] face is horribly mangled!")]\n"
+		var/datum/robolimb/robohead = all_robolimbs[E.model]
+		if(length(robohead?.display_text) && facial_hair_style == "Text")
+			msg += "The message \"[robohead.display_text]\" is displayed on its screen.\n"
 
 	//splints
 	for(var/organ in list(BP_L_LEG, BP_R_LEG, BP_L_ARM, BP_R_ARM))

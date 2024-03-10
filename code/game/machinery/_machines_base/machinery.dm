@@ -89,6 +89,17 @@
 	RefreshParts()
 	power_change()
 
+/obj/machinery/post_health_change(health_mod, prior_health, damage_type)
+	if (health_mod < 0 && !health_dead())
+		var/initial_damage_percentage = Percent(get_max_health() - prior_health, get_max_health(), 0)
+		var/damage_percentage = get_damage_percentage()
+		if (damage_percentage >= 75 && initial_damage_percentage < 75)
+			visible_message(SPAN_DANGER("\The [src] looks like it's about to break!"))
+		else if (damage_percentage >= 50 && initial_damage_percentage < 50)
+			visible_message(SPAN_DANGER("\The [src] looks seriously damaged!" ))
+		else if (damage_percentage >= 25 && initial_damage_percentage < 25)
+			visible_message(SPAN_DANGER("\The [src] shows signs of damage!" ))
+
 /obj/machinery/Destroy()
 	if(istype(wires))
 		QDEL_NULL(wires)
@@ -114,7 +125,7 @@
 	if(use_power && operable())
 		use_power_oneoff(7500/severity)
 
-		var/obj/effect/overlay/pulse2 = new /obj/effect/overlay(loc)
+		var/obj/overlay/pulse2 = new /obj/overlay(loc)
 		pulse2.icon = 'icons/effects/effects.dmi'
 		pulse2.icon_state = "empdisable"
 		pulse2.SetName("emp sparks")
@@ -131,7 +142,7 @@
 			else
 				wires.RandomPulse()
 				visible_message(SPAN_WARNING("Something sparks inside \the [src]'s wiring panel!"))
-				new /obj/effect/sparks(get_turf(src))
+				new /obj/sparks(get_turf(src))
 
 		..()
 
@@ -225,38 +236,31 @@
 // If you don't call parent in this proc, you must make all appropriate checks yourself.
 // If you do, you must respect the return value.
 /obj/machinery/attack_hand(mob/user)
-	if((. = ..())) // Buckling, climbers; unlikely to return true.
+	if((. = ..())) // Buckling, climbers; unlikely to return true unless on harm intent and damage is dealt.
 		return
-	if(MUTATION_FERAL in user.mutations)
-		user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN*2)
-		attack_generic(user, 10, "smashes")
-		return TRUE
 	if(!CanPhysicallyInteract(user))
 		return FALSE // The interactions below all assume physical access to the machine. If this is not the case, we let the machine take further action.
 	if(!user.IsAdvancedToolUser())
-		to_chat(user, SPAN_WARNING("You don't have the dexterity to do this!"))
 		return TRUE
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
-		if(H.getBrainLoss() >= 55)
+		if(H.getBrainLoss() >= 80)
 			visible_message(SPAN_WARNING("\The [H] stares cluelessly at \the [src]."))
 			return TRUE
-		else if(prob(H.getBrainLoss()))
-			to_chat(user, SPAN_WARNING("You momentarily forget how to use \the [src]."))
-			return TRUE
 	if((. = component_attack_hand(user)))
-		return
+		return TRUE
 	if(wires && (. = wires.Interact(user)))
-		return
+		return TRUE
 	if((. = physical_attack_hand(user)))
-		return
+		return TRUE
 	if(CanUseTopic(user, DefaultTopicState()) > STATUS_CLOSE)
 		return interface_interact(user)
 
 
 /obj/machinery/post_anchor_change()
-	..()
+	update_use_power(anchored)
 	power_change()
+	..()
 
 /**
  * Called by machines that can hold a mob (sleeper, suit cycler, etc.), checking if mob can be moved before doing so.
@@ -344,7 +348,7 @@
 		return FALSE
 	if(!prob(prb))
 		return FALSE
-	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	var/datum/effect/spark_spread/s = new /datum/effect/spark_spread
 	s.set_up(5, 1, src)
 	s.start()
 	if(electrocute_mob(user, get_area(src), src, 0.7))

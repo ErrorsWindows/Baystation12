@@ -62,7 +62,7 @@ var/global/solar_gen_rate = 1500
 
 
 
-/obj/machinery/power/solar/attackby(obj/item/W, mob/user)
+/obj/machinery/power/solar/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(isCrowbar(W))
 		playsound(src.loc, 'sound/machines/click.ogg', 50, 1)
 		user.visible_message(SPAN_NOTICE("[user] begins to take the glass off the solar panel."))
@@ -76,7 +76,7 @@ var/global/solar_gen_rate = 1500
 			qdel(src)
 		return TRUE
 
-	. = ..()
+	return ..()
 
 /obj/machinery/power/solar/on_update_icon()
 	..()
@@ -173,7 +173,7 @@ var/global/solar_gen_rate = 1500
 	// On planets, we take fewer steps because the light is mostly up
 	// Also, many planets barely have any spots with enough clear space around
 	if(GLOB.using_map.use_overmap)
-		var/obj/effect/overmap/visitable/sector/exoplanet/E = map_sectors["[z]"]
+		var/obj/overmap/visitable/sector/exoplanet/E = map_sectors["[z]"]
 		if(istype(E))
 			steps = 5
 

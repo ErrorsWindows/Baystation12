@@ -294,27 +294,67 @@
 	name = "SCGF recruitment poster"
 	desc = "A poster produced by the SCGF. It depicts a tactical-looking Fourth Fleet petty officer, standing in front of the SCG flag proudly."
 
-/singleton/poster/torch
-	icon_state="poster_ripped"
-	name = "Torch Poster"
+/singleton/poster/annoyed_gas
+	icon_state = "annoyed_gas"
+	name = "Annoyed GAS"
+	desc = "The poster shows a chittering Giant Armored Serpentid with its scythe arms raised \
+	and ready to attack. \"Run!\" is written in big red letters, and at the very bottom there \
+	is a small text: \"If during the communication process the GAS began to actively chitter, \
+	buzz, raised sickles or strikes in the air with them - you must turn around and leave him \
+	alone.\""
+
+/singleton/poster/healthy_hugs
+	icon_state = "healthy_hugs"
+	name = "Healthy hugs"
+	desc = "The poster shows a Giant Armored Serpentid holding a girl with a yellow flower in \
+	her hair with sickles. On the left - a large inscription \"HUGS\" in green letters, under \
+	which it is written in small letters: \"Hugs are useful both morally and physically: for \
+	example, the human race lowers blood pressure and produces oxytocin. Almost any crew will \
+	increase confidence and feel good. The main thing is - be sure to ask permission.\""
+
+/singleton/poster/no_alcohol
+	icon_state = "no_alcohol"
+	name = "СП * РТ"
+	desc = "At the very top of the poster is a word, where one of the letters is replaced by \
+	an asterisk: \"СП * РТ\", and below - two signatures. The first: \"o - сила\", the second \
+	\"и - могила\". The poster is clean and without small text, which makes it clear the \
+	seriousness of the statement."
+
+/singleton/poster/pizza_for_captain
+	icon_state = "pizza_for_captain"
+	name = "Pizza for Captain"
+	desc = "On fairly cheap thick paper, the red inscription reads: \"Pizza for Captain\". The \
+	slice of pizza itself is also drawn... with pineapples? Wouldn't eat this for anything! \
+	Someone apparently doesn't like the captain very much..."
+
+/singleton/poster/would_you_plant
+	icon_state = "would_you_plant"
+	name = "Would you seed?"
+	desc = "A large green poster shows a brand new hydroponic tray. On top is a large text with \
+	the evocative question, \"Would you seed?\", with small text explaining, \"Hydroponic trays \
+	allow you to grow absolutely any crop quickly and efficiently, and the indicators tell you \
+	when the plant needs care! And how can you not seed one of these?\""
+
+/singleton/poster/cabbage_tray
+	icon_state = "cabbage_tray"
+	name = "Cabbage tray"
+	desc = "The poster shows a Giant Armored Serpentid with a hydroponic tray of ripe cabbage \
+	in front of it, indicated by a green indicator on it. On the left side of the poster it \
+	says: \"Most GAS don't know how to cut existing plantings. Please don't plant all the trays \
+	and leave a few free ones. In order for the serpentid to eat, it only needs literally a \
+	couple of empty trays.\""
+
+/singleton/poster/contraband_only
+	icon_state = "poster_ripped"
+	name = "Contraband Poster"
 	desc = "You probably shouldn't be seeing this."
+	abstract_type = /singleton/poster/contraband_only
+	poster_flags = POSTER_FLAG_RANDOM_PICK | POSTER_FLAG_CONTRABAND
 
-/singleton/poster/torch/event1
-	icon_state="bsposter_event1"
-	name = "Justice for Joe"
-	desc = "A hand-written poster demanding the release of one SCPO Joseph Tornakov from Fleet Intelligence custody. It's somewhat faded."
-
-/singleton/poster/torch/event2
-	icon_state="bsposter_event2"
-	name = "Captain for Senate"
-	desc = "A poster loudly advertising the SEV Torch's captain's upcoming bid for SCG Senate. The fine print lightly suggests that failing to vote in their favor will result in an NJP."
-
-/singleton/poster/torch/event3
-	icon_state="bsposter_event3"
-	name = "Visit E-14b Outpost"
-	desc = "This poster invites personnel to visit the the E-14b research outpost, built through joint Terran and Expeditionary Corps efforts. According to the poster, it's still under construction."
-
-/singleton/poster/torch/event4
-	icon_state="bsposter_event4"
-	name = "Scientific Cooperation"
-	desc = "This poster depicts a Sol Expeditionary Corps captain shaking hands with a Terran Pioneer Corps officer. It appears to espouse greater scientific cooperation between the two organisations."
+/singleton/poster/contraband_only/unusual_gas
+	icon_state = "unusual_gas"
+	name = "Unusual GAS"
+	desc = "The poster shows a Giant Armored Serpentid. On his tail is what appears to be a \
+	large black gaiter with purple stripes. GAS sickles are dressed in cute little mitts of \
+	the same color. The entire lower right corner of the poster is occupied by a large \
+	inscription \"uwu\", and in the lower left it says: \"More on our site - WetSkrell.nt\"."

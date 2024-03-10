@@ -11,7 +11,6 @@
 	icon = 'icons/obj/food/food.dmi'
 	icon_state = "emptycondiment"
 	atom_flags = ATOM_FLAG_OPEN_CONTAINER
-	item_flags = ITEM_FLAG_TRY_ATTACK
 	possible_transfer_amounts = "1;5;10"
 	center_of_mass = "x=16;y=6"
 	volume = 50
@@ -42,35 +41,28 @@
 /obj/item/reagent_containers/food/condiment/attack_self(mob/user as mob)
 	return
 
-/obj/item/reagent_containers/food/condiment/attack(mob/M as mob, mob/user as mob)
+/obj/item/reagent_containers/food/condiment/use_before(mob/M as mob, mob/user as mob)
 	. = FALSE
 	if (!istype(M))
 		return FALSE
 	if (standard_feed_mob(user, M))
 		return TRUE
 
-/obj/item/reagent_containers/food/condiment/afterattack(obj/target, mob/user, proximity)
-	if(!proximity)
-		return
-
-	if(standard_dispenser_refill(user, target))
-		return
-	if(standard_pour_into(user, target))
-		return
+/obj/item/reagent_containers/food/condiment/use_after(obj/target, mob/living/user, click_parameters)
+	if(standard_dispenser_refill(user, target) || standard_pour_into(user, target))
+		return TRUE
 
 	if(istype(target, /obj/item/reagent_containers/food/snacks)) // These are not opencontainers but we can transfer to them
 		if(!reagents || !reagents.total_volume)
 			to_chat(user, SPAN_NOTICE("There is no condiment left in \the [src]."))
-			return
-
+			return TRUE
 		if(!target.reagents.get_free_space())
 			to_chat(user, SPAN_NOTICE("You can't add more condiment to \the [target]."))
-			return
+			return TRUE
 
 		var/trans = reagents.trans_to_obj(target, amount_per_transfer_from_this)
 		to_chat(user, SPAN_NOTICE("You add [trans] units of the condiment to \the [target]."))
-	else
-		..()
+		return TRUE
 
 /obj/item/reagent_containers/food/condiment/feed_sound(mob/user)
 	playsound(user.loc, 'sound/items/drink.ogg', rand(10, 50), 1)
